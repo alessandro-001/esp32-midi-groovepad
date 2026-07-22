@@ -33,8 +33,21 @@ browser-based livecoding music, over the Web MIDI API.
 | OLED | JMD0.96D, I2C SSD1306 128x64, 2-color (yellow/blue) |
 | Mic | MAX4466 electret amp module |
 
-Full parts list, wiring, and per-stage build notes live in
-[docs/firmware-plan.md](docs/firmware-plan.md).
+### Bill of materials
+
+| Qty | Part | Used for |
+|---|---|---|
+| 1 | ESP32-S3-DevKitC-1 N16R8 (native USB) | main controller |
+| 2 | Breadboard | joined, to reach headers on both sides of the board |
+| 6 | Pushbutton (momentary) | trigger pads |
+| 1 | Potentiometer, B5K linear, 3-pin | control knob |
+| 1 | RGB LED, 4-pin common-cathode | color feedback |
+| 3 | Discrete LED (green, yellow, red) | VU meter / status |
+| 1 | MAX4466 electret mic amp module | amplitude sensing |
+| 1 | OLED 0.96" I2C SSD1306, 128x64 | status display |
+| 6 | Resistor, 220R | 3 RGB channels + 3 discrete LEDs |
+| 6 | Resistor, 10K | one pull-down per button |
+| — | Jumper wires | assorted |
 
 ### Pin map
 
