@@ -6,6 +6,7 @@
 #include "led_feedback.h"
 #include "oled_display.h"
 #include "mic.h"
+#include "midi_out.h"
 
 #define NUM_LEDS 1
 CRGB leds[NUM_LEDS];
@@ -23,6 +24,7 @@ void setup() {
   ledFeedbackInit();
   oledInit();
   micInit();
+  midiInit();
 }
 
 void loop() {
@@ -42,22 +44,22 @@ void loop() {
 
   int potValue;
   if (potPoll(potValue)) {
-    Serial.print("Pot: ");
-    Serial.println(potValue);
+    // Serial.print("Pot: ");
+    // Serial.println(potValue);
     oledShowPotValue(potValue);
   }
 
-  // Throttled tuning print for the mic thresholds in mic.cpp, quiet down or
-  // remove once the L1/L2/L3 values are set from real readings.
-  static uint32_t lastMicPrint = 0;
-  if (now - lastMicPrint >= 150) {
-    lastMicPrint = now;
-    Serial.print("Mic raw: ");
-    Serial.print(micGetAmplitude());
-    Serial.print("  energy: ");
-    Serial.print(micGetEnergy());
-    Serial.print("  level: ");
-    Serial.println(micGetLevel());
+  // Mic thresholds (mic.cpp) are already tuned, prints commented out to keep
+  // the monitor readable, uncomment if the thresholds need re-tuning later.
+  static uint32_t lastMicUpdate = 0;
+  if (now - lastMicUpdate >= 150) {
+    lastMicUpdate = now;
+    // Serial.print("Mic raw: ");
+    // Serial.print(micGetAmplitude());
+    // Serial.print("  energy: ");
+    // Serial.print(micGetEnergy());
+    // Serial.print("  level: ");
+    // Serial.println(micGetLevel());
     oledShowMicLevel(micGetEnergy());
   }
 }

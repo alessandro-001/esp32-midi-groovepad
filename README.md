@@ -8,18 +8,19 @@
 
 A breadboard MIDI controller built on an ESP32-S3 with native USB. It reads six
 buttons, a potentiometer, and a microphone amplitude signal, and drives an RGB
-LED, three discrete status LEDs, and an OLED display as feedback. The end goal is
-a class-compliant USB-MIDI device for playing [Strudel](https://strudel.cc),
+LED, three discrete status LEDs, and an OLED display as feedback, all sent out
+as class-compliant USB-MIDI for playing [Strudel](https://strudel.cc),
 browser-based livecoding music, over the Web MIDI API.
 
 ## Features
 
-- **6 pushbuttons** with clean digital debounce, external 10K pull-downs, active-HIGH
+- **6 pushbuttons** with clean digital debounce, external 10K pull-downs, active-HIGH, each sends a USB-MIDI note-on/note-off
 - **Potentiometer** read on the ADC, mapped 0 to 127 with hysteresis to kill jitter
 - **4-pin RGB LED** driven by per-channel PWM (green is dimmed since it reads brighter to the eye)
-- **3 discrete LEDs** wired green, yellow, red for a VU-meter style readout
-- **0.96" I2C OLED** (SSD1306, 128x64) showing live status, mounted upside-down with a software 180 degree rotation
-- **MAX4466 electret mic** for amplitude sensing (in progress)
+- **3 discrete LEDs** wired green, yellow, red as a live microphone VU meter
+- **0.96" I2C OLED** (SSD1306, 128x64) showing pot value and a mic level bar, mounted upside-down with a software 180 degree rotation
+- **MAX4466 electret mic**, peak-to-peak amplitude with noise-floor subtraction, drives the VU meter and OLED bar
+- **USB-MIDI transport** over the native USB port (built-in `USBMIDI` class, no extra libraries), class-compliant, no drivers needed
 
 ## Hardware
 
@@ -62,6 +63,14 @@ browser-based livecoding music, over the Web MIDI API.
 > pins are avoided throughout. GPIO0/3/45/46 (strapping) and GPIO19/20 (native
 > USB D-/D+) are also left free.
 
+### MIDI note map
+
+Channel 1, velocity 100. Needed if you're writing a Strudel pattern to trigger these:
+
+| Button | 1 | 2 | 3 | 4 | 5 | 6 |
+|---|---|---|---|---|---|---|
+| MIDI note | 36 | 37 | 38 | 39 | 40 | 41 |
+
 ## Build and flash
 
 This is a [PlatformIO](https://platformio.org) project.
@@ -76,8 +85,9 @@ pio device monitor -b 115200
 ```
 
 The board exposes two USB-C ports, `USB` (native) and `COM` (UART bridge). Use the
-`COM` port for flashing and the serial monitor during development. The native USB
-port becomes the MIDI interface once the USB-MIDI stage lands.
+`COM` port for flashing and the serial monitor, both cables can stay plugged in
+at once. The native `USB` port is the MIDI interface, no drivers needed on a
+modern OS, it enumerates as a class-compliant MIDI device.
 
 ## Build stages
 
@@ -88,6 +98,6 @@ compile, flash, and pass its test before the next begins.
 - [x] **Stage 1** Buttons and potentiometer input
 - [x] **Stage 2** RGB LED and discrete LEDs
 - [x] **Stage 3** OLED display
-- [ ] **Stage 4** Microphone amplitude sensing (VU meter)
-- [ ] **Stage 5** USB-MIDI transport
+- [x] **Stage 4** Microphone amplitude sensing (VU meter)
+- [x] **Stage 5** USB-MIDI transport
 - [ ] **Stage 6** Full integration with Strudel

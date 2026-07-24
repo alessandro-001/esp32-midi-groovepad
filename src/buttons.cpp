@@ -2,6 +2,8 @@
 #include <ezButton.h>
 #include "buttons.h"
 #include "pins.h"
+#include "midi_out.h"
+#include "oled_display.h"
 
 namespace {
 const int NUM_BUTTONS = 6;
@@ -42,10 +44,14 @@ void buttonsPoll() {
       Serial.print("Button ");
       Serial.print(i + 1);
       Serial.println(" pressed");
+      midiNoteOn(i);
+      oledShowNote(midiNoteForButton(i));
     } else if (state == LOW && lastState[i] == HIGH) {
       Serial.print("Button ");
       Serial.print(i + 1);
       Serial.println(" released");
+      midiNoteOff(i);
+      oledShowNote(-1);
     }
     lastState[i] = state;
   }

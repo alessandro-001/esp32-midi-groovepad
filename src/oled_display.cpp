@@ -62,8 +62,15 @@ void oledInit() {
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0, 0);
   display.println("MIDI Groovepad");
-  display.setCursor(0, 16);
-  display.println("Pot:");
+
+  // Pot (left) / Note (right) columns, divider line between them running from
+  // the top of the "Pot:"/"Note:" labels to the bottom of the value row below.
+  display.setCursor(0, 12);
+  display.print("Pot:");
+  display.setCursor(68, 12);
+  display.print("Note:");
+  display.drawFastVLine(62, 12, 28, SSD1306_WHITE);
+
   display.setCursor(0, 52);
   display.print("Mic:");
   display.display();
@@ -71,13 +78,29 @@ void oledInit() {
 
 void oledShowPotValue(int value) {
   const int x = 0;
-  const int y = 28;
-  const int w = 60;
+  const int y = 24;
+  const int w = 56;
   const int h = 16;
   display.fillRect(x, y, w, h, SSD1306_BLACK);
   display.setTextSize(2);
   display.setCursor(x, y);
   display.print(value);
+  display.display();
+}
+
+void oledShowNote(int note) {
+  const int x = 68;
+  const int y = 24;
+  const int w = 56;
+  const int h = 16;
+  display.fillRect(x, y, w, h, SSD1306_BLACK);
+  display.setTextSize(2);
+  display.setCursor(x, y);
+  if (note < 0) {
+    display.print("--");
+  } else {
+    display.print(note);
+  }
   display.display();
 }
 
