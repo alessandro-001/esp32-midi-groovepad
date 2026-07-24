@@ -18,9 +18,10 @@ browser-based livecoding music, over the Web MIDI API.
 - **Potentiometer** read on the ADC, mapped 0 to 127 with hysteresis to kill jitter
 - **4-pin RGB LED** driven by per-channel PWM (green is dimmed since it reads brighter to the eye)
 - **3 discrete LEDs** wired green, yellow, red as a live microphone VU meter
-- **0.96" I2C OLED** (SSD1306, 128x64) showing pot value and a mic level bar, mounted upside-down with a software 180 degree rotation
+- **0.96" I2C OLED** (SSD1306, 128x64) showing live filter (pot) value, the currently-held note, and a mic level bar, mounted upside-down with a software 180 degree rotation
 - **MAX4466 electret mic**, peak-to-peak amplitude with noise-floor subtraction, drives the VU meter and OLED bar
 - **USB-MIDI transport** over the native USB port (built-in `USBMIDI` class, no extra libraries), class-compliant, no drivers needed
+- **Pot doubles as a MIDI CC 74** (filter cutoff), same reading also shown as "Filter" on the OLED
 
 ## Hardware
 
@@ -65,11 +66,37 @@ browser-based livecoding music, over the Web MIDI API.
 
 ### MIDI note map
 
-Channel 1, velocity 100. Needed if you're writing a Strudel pattern to trigger these:
+Channel 1, velocity 100. Needed if you're writing a Strudel pattern (or mapping in any DAW) to trigger these:
 
 | Button | 1 | 2 | 3 | 4 | 5 | 6 |
 |---|---|---|---|---|---|---|
 | MIDI note | 36 | 37 | 38 | 39 | 40 | 41 |
+
+### MIDI CC map
+
+| Control | CC number | Channel |
+|---|---|---|
+| Potentiometer (filter cutoff) | 74 | 1 |
+
+Since this is a class-compliant USB-MIDI device, it works with any DAW on any
+computer, not just Strudel, no drivers needed. In Ableton Live for example:
+enable it under Preferences > Link/MIDI, then either play the buttons into a
+Drum Rack (note 36 is the standard General MIDI kick drum note, so these land
+right in a typical rack's normal range) or use MIDI Map Mode (Ctrl/Cmd+M) to
+bind the pot to any parameter.
+
+## Testing MIDI output
+
+[`tools/midi-monitor.html`](tools/midi-monitor.html) is a self-contained page (no
+build, no server, no dependencies) that lists incoming MIDI devices and logs
+every note-on/note-off/CC message live. Open it directly in Chrome or Edge to
+confirm button presses and pot turns are producing real MIDI, independent of
+Strudel or any DAW.
+
+## Strudel reference
+
+Pasted directly from the Strudel web app so patterns can be written offline
+against the exact sounds/synths available: [`docs/strudel-reference/`](docs/strudel-reference/).
 
 ## Build and flash
 
@@ -89,15 +116,3 @@ The board exposes two USB-C ports, `USB` (native) and `COM` (UART bridge). Use t
 at once. The native `USB` port is the MIDI interface, no drivers needed on a
 modern OS, it enumerates as a class-compliant MIDI device.
 
-## Build stages
-
-The firmware is built and hardware-verified one stage at a time. Each stage must
-compile, flash, and pass its test before the next begins.
-
-- [x] **Stage 0** Project scaffolding, onboard LED heartbeat
-- [x] **Stage 1** Buttons and potentiometer input
-- [x] **Stage 2** RGB LED and discrete LEDs
-- [x] **Stage 3** OLED display
-- [x] **Stage 4** Microphone amplitude sensing (VU meter)
-- [x] **Stage 5** USB-MIDI transport
-- [ ] **Stage 6** Full integration with Strudel

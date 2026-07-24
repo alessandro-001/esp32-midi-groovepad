@@ -47,6 +47,7 @@ void loop() {
     // Serial.print("Pot: ");
     // Serial.println(potValue);
     oledShowPotValue(potValue);
+    midiControlChange(potValue);
   }
 
   // Mic thresholds (mic.cpp) are already tuned, prints commented out to keep

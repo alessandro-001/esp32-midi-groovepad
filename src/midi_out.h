@@ -6,3 +6,6 @@ void midiInit();
 void midiNoteOn(int buttonIndex);
 void midiNoteOff(int buttonIndex);
 int midiNoteForButton(int buttonIndex);
+
+// value is 0-127 (the pot's mapped range), sent as CC 74 (filter cutoff).
+void midiControlChange(uint8_t value);

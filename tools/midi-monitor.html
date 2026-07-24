@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>MIDI Monitor</title>
+<style>
+  body { font-family: monospace; background: #111; color: #0f0; padding: 20px; }
+  h1 { color: #fff; font-size: 18px; }
+  p { color: #aaa; font-size: 13px; }
+  #status { color: #ff0; margin-bottom: 10px; }
+  #log { white-space: pre-wrap; font-size: 14px; }
+  .note-on { color: #0f0; }
+  .note-off { color: #888; }
+  .cc { color: #0cf; }
+</style>
+</head>
+<body>
+<h1>USB-MIDI Monitor</h1>
+<p>Open this file directly in Chrome or Edge (double-click it, or drag it into the browser). No server needed.</p>
+<div id="status">Requesting MIDI access...</div>
+<div id="log"></div>
+<script>
+const statusEl = document.getElementById('status');
+const logEl = document.getElementById('log');
+
+function log(line, cls) {
+  const div = document.createElement('div');
+  if (cls) div.className = cls;
+  div.textContent = line;
+  logEl.prepend(div);
+}
+
+navigator.requestMIDIAccess().then(midi => {
+  const inputs = Array.from(midi.inputs.values());
+  if (inputs.length === 0) {
+    statusEl.textContent = 'No MIDI input devices found. Is the board plugged into the native USB port?';
+    return;
+  }
+  statusEl.textContent = 'Listening on: ' + inputs.map(i => i.name).join(', ');
+  inputs.forEach(input => {
+    input.onmidimessage = (msg) => {
+      const [status, data1, data2] = msg.data;
+      const cmd = status & 0xf0;
+      const channel = (status & 0x0f) + 1;
+      const time = new Date().toLocaleTimeString();
+      if (cmd === 0x90 && data2 > 0) {
+        log(`[${time}] NOTE ON  ch=${channel} note=${data1} velocity=${data2}`, 'note-on');
+      } else if (cmd === 0x80 || (cmd === 0x90 && data2 === 0)) {
+        log(`[${time}] NOTE OFF ch=${channel} note=${data1}`, 'note-off');
+      } else if (cmd === 0xb0) {
+        log(`[${time}] CC       ch=${channel} cc=${data1} value=${data2}`, 'cc');
+      } else {
+        log(`[${time}] raw: ${Array.from(msg.data).join(',')}`);
+      }
+    };
+  });
+}).catch(err => {
+  statusEl.textContent = 'MIDI access denied or unsupported: ' + err;
+});
+</script>
+</body>
+</html>

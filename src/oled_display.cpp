@@ -60,13 +60,16 @@ void oledInit() {
   display.clearDisplay();
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
-  display.setCursor(0, 0);
+  // "MIDI Groovepad" is 14 chars * 6px = 84px at size 1, centered on the
+  // 128px-wide screen: (128-84)/2 = 22.
+  display.setCursor(22, 0);
   display.println("MIDI Groovepad");
 
-  // Pot (left) / Note (right) columns, divider line between them running from
-  // the top of the "Pot:"/"Note:" labels to the bottom of the value row below.
+  // Filter (left, the pot now drives CC 74 / lpf) / Note (right) columns,
+  // divider line between them running from the top of the labels to the
+  // bottom of the value row below.
   display.setCursor(0, 12);
-  display.print("Pot:");
+  display.print("Filter:");
   display.setCursor(68, 12);
   display.print("Note:");
   display.drawFastVLine(62, 12, 28, SSD1306_WHITE);

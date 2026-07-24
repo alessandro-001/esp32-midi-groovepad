@@ -10,6 +10,10 @@ USBMIDI MIDI;
 // range), channel 1.
 const uint8_t BASE_NOTE = 36;
 const uint8_t VELOCITY = 100;
+
+// Standard "filter cutoff" controller number, matches this framework's own
+// bundled MidiController.ino example (MIDI_CC_CUTOFF 74).
+const uint8_t CC_FILTER_CUTOFF = 74;
 }
 
 void midiInit() {
@@ -28,4 +32,8 @@ void midiNoteOff(int buttonIndex) {
 
 int midiNoteForButton(int buttonIndex) {
   return BASE_NOTE + buttonIndex;
+}
+
+void midiControlChange(uint8_t value) {
+  MIDI.controlChange(CC_FILTER_CUTOFF, value);
 }
