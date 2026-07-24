@@ -21,3 +21,5 @@
 
 #define OLED_SDA_PIN 8
 #define OLED_SCL_PIN 9
+
+#define MIC_PIN 2

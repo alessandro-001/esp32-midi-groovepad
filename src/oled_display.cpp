@@ -10,6 +10,13 @@ const int SCREEN_WIDTH = 128;
 const int SCREEN_HEIGHT = 64;
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
+// Light smoothing (EMA) so the bar doesn't jitter between windows, this is a
+// display-only concern, mic.cpp's raw amplitude stays untouched for tuning.
+int smoothedMicAmplitude = 0;
+// Energy value (amplitude above noise floor) that fills the bar completely.
+// Above mic.cpp's L3 (red) threshold so a loud hit fills it without pinning.
+const int MIC_BAR_MAX = 450;
+
 // Scans the I2C bus and prints any device addresses found, this is the
 // spec's "I2C scanner sketch" step folded into normal startup. Returns the
 // first address found, or 0 if nothing responded.
@@ -57,6 +64,8 @@ void oledInit() {
   display.println("MIDI Groovepad");
   display.setCursor(0, 16);
   display.println("Pot:");
+  display.setCursor(0, 52);
+  display.print("Mic:");
   display.display();
 }
 
@@ -69,5 +78,28 @@ void oledShowPotValue(int value) {
   display.setTextSize(2);
   display.setCursor(x, y);
   display.print(value);
+  display.display();
+}
+
+// Drawn at y=50-59, the bottom 16 rows of our (rotated) drawing coordinates.
+// After the 180-degree rotation fix, that's where the yellow strip physically
+// sits on this upside-down-mounted panel. Starts at x=28 to clear the "Mic:"
+// label (4 chars * 6px = 24px, drawn once in oledInit()) to its left.
+void oledShowMicLevel(int amplitude) {
+  smoothedMicAmplitude += (amplitude - smoothedMicAmplitude) / 4;
+
+  const int barX = 28;
+  const int barY = 50;
+  const int barW = 96;
+  const int barH = 10;
+
+  int clamped = constrain(smoothedMicAmplitude, 0, MIC_BAR_MAX);
+  int fillW = map(clamped, 0, MIC_BAR_MAX, 0, barW - 2);
+
+  display.drawRect(barX, barY, barW, barH, SSD1306_WHITE);
+  display.fillRect(barX + 1, barY + 1, barW - 2, barH - 2, SSD1306_BLACK);
+  if (fillW > 0) {
+    display.fillRect(barX + 1, barY + 1, fillW, barH - 2, SSD1306_WHITE);
+  }
   display.display();
 }

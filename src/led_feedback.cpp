@@ -37,23 +37,19 @@ void setDiscreteLeds(bool led1, bool led2, bool led3) {
 }
 
 const uint32_t STEP_INTERVAL_MS = 1000;
-const int NUM_STEPS = 9;
+const int NUM_STEPS = 4;
 uint32_t lastStep = 0;
 int step = 0;
 
-// 9-step repeating test sequence, 1 second per step: RGB red/green/blue/off,
-// then discrete LEDs all on, all off, then each one alone in turn.
+// 4-step repeating RGB cycle, 1 second per step, kept as a simple "alive"
+// indicator. The discrete LEDs moved to the mic VU meter (ledVuMeter) as of
+// Stage 4, they're no longer part of this self-test.
 void applyStep(int s) {
   switch (s) {
-    case 0: setRgb(true, false, false); setDiscreteLeds(false, false, false); break;
+    case 0: setRgb(true, false, false); break;
     case 1: setRgb(false, true, false); break;
     case 2: setRgb(false, false, true); break;
     case 3: setRgb(false, false, false); break;
-    case 4: setDiscreteLeds(true, true, true); break;
-    case 5: setDiscreteLeds(false, false, false); break;
-    case 6: setDiscreteLeds(true, false, false); break;
-    case 7: setDiscreteLeds(false, true, false); break;
-    case 8: setDiscreteLeds(false, false, true); break;
   }
 }
 }
@@ -75,4 +71,10 @@ void ledFeedbackPoll() {
     step = (step + 1) % NUM_STEPS;
     applyStep(step);
   }
+}
+
+// level: 0 (quiet) to 3 (loud). Green lights at 1+, yellow joins at 2+, red
+// joins at 3, a standard rising VU meter.
+void ledVuMeter(int level) {
+  setDiscreteLeds(level >= 1, level >= 2, level >= 3);
 }
